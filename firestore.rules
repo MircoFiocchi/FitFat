@@ -1,0 +1,11 @@
+rules_version = '2';
+
+// MVP sin autenticación — ajustar cuando se agregue auth.
+// Para uso personal: restringir en producción o habilitar Firebase Auth.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /weightEntries/{entryId} {
+      allow read, write: if true;
+    }
+  }
+}
