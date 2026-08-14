@@ -3,12 +3,14 @@ export type WeightEntry = {
   weight: number;
   date: Date;
   createdAt: Date;
+  note: string;
 };
 
 export type FirestoreWeightEntry = {
   weight: number;
   date: { seconds: number; nanoseconds: number } | Date;
   createdAt: { seconds: number; nanoseconds: number } | Date;
+  note?: string;
 };
 
 export type WeightEntryWithChange = WeightEntry & {
@@ -34,9 +36,11 @@ export type WeeklyWeightSummary = {
 export type WeightFormData = {
   weight: string;
   date: string;
+  note: string;
 };
 
 export type WeightFormErrors = {
   weight?: string;
   date?: string;
+  note?: string;
 };

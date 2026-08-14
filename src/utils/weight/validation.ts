@@ -3,6 +3,11 @@ import { parseDateInputValue } from "@/utils/date/weight-week";
 
 const MIN_WEIGHT = 20;
 const MAX_WEIGHT = 300;
+export const NOTE_MAX_LENGTH = 200;
+
+export function normalizeWeightInput(value: string): string {
+  return value.replace(",", ".");
+}
 
 export function validateWeight(weight: string): string | undefined {
   const trimmed = weight.trim();
@@ -10,7 +15,7 @@ export function validateWeight(weight: string): string | undefined {
     return "El peso es obligatorio";
   }
 
-  const parsed = Number(trimmed);
+  const parsed = Number(normalizeWeightInput(trimmed));
   if (Number.isNaN(parsed)) {
     return "El peso debe ser un número";
   }
@@ -24,11 +29,27 @@ export function validateWeight(weight: string): string | undefined {
   return undefined;
 }
 
+export function validateNote(note: string): string | undefined {
+  if (note.trim().length > NOTE_MAX_LENGTH) {
+    return `El motivo no puede superar los ${NOTE_MAX_LENGTH} caracteres`;
+  }
+  return undefined;
+}
+
+export function sanitizeNote(note: string): string {
+  return note.trim();
+}
+
 export function validateWeightForm(data: WeightFormData): WeightFormErrors {
   const errors: WeightFormErrors = {};
   const weightError = validateWeight(data.weight);
   if (weightError) {
     errors.weight = weightError;
+  }
+
+  const noteError = validateNote(data.note);
+  if (noteError) {
+    errors.note = noteError;
   }
 
   if (!data.date) {
@@ -43,7 +64,7 @@ export function validateWeightForm(data: WeightFormData): WeightFormErrors {
 export function parseWeightValue(value: string): number | null {
   const trimmed = value.trim();
   if (!trimmed) return null;
-  const parsed = Number(trimmed);
+  const parsed = Number(normalizeWeightInput(trimmed));
   if (Number.isNaN(parsed)) return null;
   return parsed;
 }

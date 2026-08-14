@@ -3,14 +3,21 @@
 import { useState, type FormEvent } from "react";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { formatDate } from "@/lib/format";
 import { parseDateInputValue, toDateInputValue } from "@/utils/date/weight-week";
-import { validateWeight, parseWeightValue } from "@/utils/weight/validation";
+import {
+  validateWeight,
+  validateNote,
+  parseWeightValue,
+  sanitizeNote,
+  NOTE_MAX_LENGTH,
+} from "@/utils/weight/validation";
 
 type WeightFormProps = {
-  onSubmit: (weight: number, date: Date) => Promise<void>;
+  onSubmit: (weight: number, date: Date, note: string) => Promise<void>;
 };
 
 function getTodayDate(): Date {
@@ -20,7 +27,9 @@ function getTodayDate(): Date {
 
 export function WeightForm({ onSubmit }: WeightFormProps) {
   const [weight, setWeight] = useState("");
+  const [note, setNote] = useState("");
   const [weightError, setWeightError] = useState<string | undefined>();
+  const [noteError, setNoteError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -31,18 +40,22 @@ export function WeightForm({ onSubmit }: WeightFormProps) {
     setSuccess(false);
     setSubmitError(null);
 
-    const error = validateWeight(weight);
-    setWeightError(error);
-    if (error) return;
+    const nextWeightError = validateWeight(weight);
+    const nextNoteError = validateNote(note);
+    setWeightError(nextWeightError);
+    setNoteError(nextNoteError);
+    if (nextWeightError || nextNoteError) return;
 
     const parsedWeight = parseWeightValue(weight);
     if (parsedWeight === null) return;
 
     setLoading(true);
     try {
-      await onSubmit(parsedWeight, getTodayDate());
+      await onSubmit(parsedWeight, getTodayDate(), sanitizeNote(note));
       setWeight("");
+      setNote("");
       setWeightError(undefined);
+      setNoteError(undefined);
       setSuccess(true);
     } catch {
       setSubmitError("No se pudo guardar el peso. Intentá de nuevo.");
@@ -60,16 +73,24 @@ export function WeightForm({ onSubmit }: WeightFormProps) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
           <Input
             label="Peso"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="0.1"
-            min="20"
-            max="300"
+            enterKeyHint="next"
+            autoComplete="off"
             placeholder="84.5"
             suffix="kg"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             error={weightError}
+          />
+          <Textarea
+            label="Motivo"
+            hint="Opcional. Por ejemplo: fin de semana, entrené, comí afuera."
+            placeholder="¿Por qué subió o bajó el peso?"
+            maxLength={NOTE_MAX_LENGTH}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            error={noteError}
           />
           <p className="text-sm text-muted">
             Fecha: <span className="text-foreground">{todayLabel}</span>

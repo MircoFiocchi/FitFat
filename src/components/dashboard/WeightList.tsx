@@ -28,6 +28,9 @@ export function WeightList({ entries }: WeightListProps) {
               {formatWeightChange(entry.change)}
             </p>
           </div>
+          {entry.note && (
+            <p className="mt-2 text-sm text-muted">{entry.note}</p>
+          )}
         </Card>
       ))}
     </div>

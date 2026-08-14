@@ -45,8 +45,8 @@ describe("getWeekKey", () => {
 describe("sortEntriesByDateAsc", () => {
   it("sorts oldest first", () => {
     const entries: WeightEntry[] = [
-      { id: "2", weight: 84, date: new Date(2026, 7, 12), createdAt: new Date() },
-      { id: "1", weight: 85, date: new Date(2026, 7, 10), createdAt: new Date() },
+      { id: "2", weight: 84, date: new Date(2026, 7, 12), createdAt: new Date(), note: "" },
+      { id: "1", weight: 85, date: new Date(2026, 7, 10), createdAt: new Date(), note: "" },
     ];
     const sorted = sortEntriesByDateAsc(entries);
     expect(sorted[0].id).toBe("1");
@@ -57,8 +57,8 @@ describe("sortEntriesByDateAsc", () => {
 describe("sortEntriesByDateDesc", () => {
   it("sorts newest first", () => {
     const entries: WeightEntry[] = [
-      { id: "1", weight: 85, date: new Date(2026, 7, 10), createdAt: new Date() },
-      { id: "2", weight: 84, date: new Date(2026, 7, 12), createdAt: new Date() },
+      { id: "1", weight: 85, date: new Date(2026, 7, 10), createdAt: new Date(), note: "" },
+      { id: "2", weight: 84, date: new Date(2026, 7, 12), createdAt: new Date(), note: "" },
     ];
     const sorted = sortEntriesByDateDesc(entries);
     expect(sorted[0].id).toBe("2");

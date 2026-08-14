@@ -18,7 +18,8 @@ export function WeightTable({ entries }: WeightTableProps) {
           <tr className="border-b border-border text-muted">
             <th className="pb-3 pr-4 font-medium">Fecha</th>
             <th className="pb-3 pr-4 font-medium">Peso</th>
-            <th className="pb-3 font-medium">Cambio</th>
+            <th className="pb-3 pr-4 font-medium">Cambio</th>
+            <th className="pb-3 font-medium">Motivo</th>
           </tr>
         </thead>
         <tbody>
@@ -33,8 +34,11 @@ export function WeightTable({ entries }: WeightTableProps) {
               <td className="py-3 pr-4 font-medium">
                 {formatWeight(entry.weight)}
               </td>
-              <td className="py-3 text-muted">
+              <td className="py-3 pr-4 text-muted">
                 {formatWeightChange(entry.change)}
+              </td>
+              <td className="py-3 text-muted">
+                {entry.note || "—"}
               </td>
             </tr>
           ))}
