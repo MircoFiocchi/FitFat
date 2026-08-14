@@ -22,6 +22,7 @@ type ChartPoint = {
   dateLabel: string;
   weight: number;
   fullDate: string;
+  note: string;
 };
 
 export function WeightChart({ entries }: WeightChartProps) {
@@ -30,6 +31,7 @@ export function WeightChart({ entries }: WeightChartProps) {
     dateLabel: formatDate(entry.date),
     weight: entry.weight,
     fullDate: formatDate(entry.date),
+    note: entry.note,
   }));
 
   if (data.length === 0) return null;
@@ -70,7 +72,13 @@ export function WeightChart({ entries }: WeightChartProps) {
                   color: "#e8edf2",
                   fontSize: "14px",
                 }}
-                formatter={(value) => [`${Number(value).toFixed(1)} kg`, "Peso"]}
+                formatter={(value, _name, item) => {
+                  const note = item.payload?.note;
+                  const weightLabel = `${Number(value).toFixed(1)} kg`;
+                  return note
+                    ? [`${weightLabel} — ${note}`, "Peso"]
+                    : [weightLabel, "Peso"];
+                }}
                 labelFormatter={(label) => `Fecha: ${label}`}
               />
               <Line

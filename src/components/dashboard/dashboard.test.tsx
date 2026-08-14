@@ -26,9 +26,27 @@ describe("WeightForm", () => {
     await user.click(screen.getByRole("button", { name: /guardar peso/i }));
 
     await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith(84.5, expect.any(Date));
+      expect(onSubmit).toHaveBeenCalledWith(84.5, expect.any(Date), "");
     });
     expect(screen.getByText("Peso guardado correctamente.")).toBeInTheDocument();
+  });
+
+  it("submits optional note", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(<WeightForm onSubmit={onSubmit} />);
+
+    await user.type(screen.getByLabelText("Peso"), "84.5");
+    await user.type(screen.getByLabelText("Motivo"), "Fin de semana");
+    await user.click(screen.getByRole("button", { name: /guardar peso/i }));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        84.5,
+        expect.any(Date),
+        "Fin de semana",
+      );
+    });
   });
 });
 

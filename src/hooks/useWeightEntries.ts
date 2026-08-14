@@ -11,8 +11,13 @@ type UseWeightEntriesState = {
   entries: WeightEntry[];
   loading: boolean;
   error: string | null;
-  addEntry: (weight: number, date: Date) => Promise<void>;
-  updateEntry: (id: string, weight: number, date: Date) => Promise<void>;
+  addEntry: (weight: number, date: Date, note: string) => Promise<void>;
+  updateEntry: (
+    id: string,
+    weight: number,
+    date: Date,
+    note: string,
+  ) => Promise<void>;
   removeEntry: (id: string) => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -71,34 +76,37 @@ export function useWeightEntries(): UseWeightEntriesState {
     }
   }, []);
 
-  const addEntry = useCallback(async (weight: number, date: Date) => {
-    setError(null);
-    try {
-      const newEntry = await createWeightEntry(weight, date);
-      setEntries((prev) =>
-        [...prev, newEntry].sort(
-          (a, b) => b.date.getTime() - a.date.getTime(),
-        ),
-      );
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "No se pudo guardar el registro";
-      setError(message);
-      throw err;
-    }
-  }, []);
-
-  const updateEntry = useCallback(
-    async (id: string, weight: number, date: Date) => {
+  const addEntry = useCallback(
+    async (weight: number, date: Date, note: string) => {
       setError(null);
       try {
-        await updateWeightEntry(id, weight, date);
+        const newEntry = await createWeightEntry(weight, date, note);
+        setEntries((prev) =>
+          [...prev, newEntry].sort(
+            (a, b) => b.date.getTime() - a.date.getTime(),
+          ),
+        );
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : "No se pudo guardar el registro";
+        setError(message);
+        throw err;
+      }
+    },
+    [],
+  );
+
+  const updateEntry = useCallback(
+    async (id: string, weight: number, date: Date, note: string) => {
+      setError(null);
+      try {
+        await updateWeightEntry(id, weight, date, note);
         setEntries((prev) =>
           prev
             .map((entry) =>
-              entry.id === id ? { ...entry, weight, date } : entry,
+              entry.id === id ? { ...entry, weight, date, note } : entry,
             )
             .sort((a, b) => b.date.getTime() - a.date.getTime()),
         );

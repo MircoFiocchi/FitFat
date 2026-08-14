@@ -40,6 +40,32 @@ firebase deploy --only firestore:rules
 
 5. Crear índice si Firestore lo solicita al ordenar por `date`.
 
+## Despliegue en Vercel
+
+`.env.local` **no se sube a Git**. En Vercel debes configurar las variables manualmente:
+
+1. Vercel → tu proyecto → **Settings** → **Environment Variables**
+2. Agregar cada variable (Production, Preview y Development):
+
+| Variable | Ejemplo |
+|---|---|
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | tu api key |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | toxic-out.firebaseapp.com |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | toxic-out |
+| `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | toxic-out.firebasestorage.app |
+| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | 425739103847 |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | tu app id |
+| `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` | tu measurement id |
+
+3. **Redeploy** después de agregar las variables (Deployments → Redeploy). Las `NEXT_PUBLIC_*` se embeben en el build; sin redeploy no funcionan.
+
+4. En [Firebase Console](https://console.firebase.google.com) → proyecto `toxic-out`:
+   - **Firestore Database** → Create database (si no existe)
+   - **Firestore** → **Rules** → publicar reglas que permitan lectura/escritura en `weightEntries` (ver `firestore.rules`)
+   - **Authentication** → **Settings** → **Authorized domains** → agregar tu dominio Vercel (ej. `fitfat.vercel.app`)
+
+5. Si al cargar datos aparece error de índice en consola, crear el índice desde el enlace que muestra Firebase.
+
 ## Scripts
 
 ```bash

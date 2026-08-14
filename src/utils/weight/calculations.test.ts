@@ -13,7 +13,7 @@ function makeEntry(
   weight: number,
   date: Date,
 ): WeightEntry {
-  return { id, weight, date, createdAt: date };
+  return { id, weight, date, createdAt: date, note: "" };
 }
 
 describe("calculateChange", () => {

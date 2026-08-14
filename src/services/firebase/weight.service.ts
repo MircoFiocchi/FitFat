@@ -36,11 +36,14 @@ function timestampToDate(
 }
 
 function docToWeightEntry(id: string, data: DocumentData): WeightEntry {
+  const note =
+    typeof data.note === "string" ? data.note : "";
   return {
     id,
     weight: data.weight as number,
     date: timestampToDate(data.date),
     createdAt: timestampToDate(data.createdAt),
+    note,
   };
 }
 
@@ -59,6 +62,7 @@ export async function getWeightEntries(): Promise<WeightEntry[]> {
 export async function createWeightEntry(
   weight: number,
   date: Date,
+  note = "",
 ): Promise<WeightEntry> {
   const db = getFirestoreDb();
   const now = new Date();
@@ -66,6 +70,7 @@ export async function createWeightEntry(
     weight,
     date: Timestamp.fromDate(date),
     createdAt: Timestamp.fromDate(now),
+    note,
   };
   const docRef = await addDoc(collection(db, COLLECTION_NAME), data);
   return {
@@ -73,6 +78,7 @@ export async function createWeightEntry(
     weight,
     date,
     createdAt: now,
+    note,
   };
 }
 
@@ -80,12 +86,14 @@ export async function updateWeightEntry(
   id: string,
   weight: number,
   date: Date,
+  note = "",
 ): Promise<void> {
   const db = getFirestoreDb();
   const docRef = doc(db, COLLECTION_NAME, id);
   await updateDoc(docRef, {
     weight,
     date: Timestamp.fromDate(date),
+    note,
   });
 }
 

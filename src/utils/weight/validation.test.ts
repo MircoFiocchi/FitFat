@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { validateWeightForm, validateWeight, parseWeightValue } from "@/utils/weight/validation";
+import {
+  validateWeightForm,
+  validateWeight,
+  validateNote,
+  parseWeightValue,
+  NOTE_MAX_LENGTH,
+} from "@/utils/weight/validation";
 
 describe("validateWeight", () => {
   it("requires weight", () => {
@@ -22,47 +28,67 @@ describe("validateWeight", () => {
   it("passes valid weight", () => {
     expect(validateWeight("84.5")).toBeUndefined();
   });
+
+  it("accepts comma as decimal separator", () => {
+    expect(validateWeight("84,5")).toBeUndefined();
+  });
 });
 
 describe("validateWeightForm", () => {
   it("requires weight", () => {
-    const errors = validateWeightForm({ weight: "", date: "2026-08-12" });
+    const errors = validateWeightForm({ weight: "", note: "", date: "2026-08-12" });
     expect(errors.weight).toBeDefined();
   });
 
   it("rejects non-numeric weight", () => {
-    const errors = validateWeightForm({ weight: "abc", date: "2026-08-12" });
+    const errors = validateWeightForm({ weight: "abc", note: "", date: "2026-08-12" });
     expect(errors.weight).toBe("El peso debe ser un número");
   });
 
   it("rejects zero or negative weight", () => {
-    expect(validateWeightForm({ weight: "0", date: "2026-08-12" }).weight).toBe(
+    expect(validateWeightForm({ weight: "0", note: "", date: "2026-08-12" }).weight).toBe(
       "El peso debe ser mayor que 0",
     );
-    expect(validateWeightForm({ weight: "-5", date: "2026-08-12" }).weight).toBe(
+    expect(validateWeightForm({ weight: "-5", note: "", date: "2026-08-12" }).weight).toBe(
       "El peso debe ser mayor que 0",
     );
   });
 
   it("rejects out of range weight", () => {
-    const errors = validateWeightForm({ weight: "500", date: "2026-08-12" });
+    const errors = validateWeightForm({ weight: "500", note: "", date: "2026-08-12" });
     expect(errors.weight).toContain("entre");
   });
 
   it("requires valid date", () => {
-    const errors = validateWeightForm({ weight: "84.5", date: "" });
+    const errors = validateWeightForm({ weight: "84.5", note: "", date: "" });
     expect(errors.date).toBe("La fecha es obligatoria");
   });
 
   it("passes valid form", () => {
-    const errors = validateWeightForm({ weight: "84.5", date: "2026-08-12" });
+    const errors = validateWeightForm({ weight: "84.5", note: "", date: "2026-08-12" });
     expect(Object.keys(errors).length).toBe(0);
+  });
+});
+
+describe("validateNote", () => {
+  it("allows empty note", () => {
+    expect(validateNote("")).toBeUndefined();
+  });
+
+  it("rejects notes that are too long", () => {
+    expect(validateNote("a".repeat(NOTE_MAX_LENGTH + 1))).toContain(
+      String(NOTE_MAX_LENGTH),
+    );
   });
 });
 
 describe("parseWeightValue", () => {
   it("parses valid number", () => {
     expect(parseWeightValue("84.5")).toBe(84.5);
+  });
+
+  it("parses comma as decimal separator", () => {
+    expect(parseWeightValue("84,5")).toBe(84.5);
   });
 
   it("returns null for invalid", () => {
