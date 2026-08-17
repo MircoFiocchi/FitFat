@@ -11,9 +11,14 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 import { getFirestoreDb } from "./config";
+import { requireUserId } from "./auth.service";
 import type { WeightEntry } from "@/types/weight";
 
 const COLLECTION_NAME = "weightEntries";
+
+function weightEntriesCollection(userId: string) {
+  return collection(getFirestoreDb(), "users", userId, COLLECTION_NAME);
+}
 
 function timestampToDate(
   value: DocumentData[keyof DocumentData],
@@ -48,9 +53,9 @@ function docToWeightEntry(id: string, data: DocumentData): WeightEntry {
 }
 
 export async function getWeightEntries(): Promise<WeightEntry[]> {
-  const db = getFirestoreDb();
+  const userId = requireUserId();
   const q = query(
-    collection(db, COLLECTION_NAME),
+    weightEntriesCollection(userId),
     orderBy("date", "desc"),
   );
   const snapshot = await getDocs(q);
@@ -64,7 +69,7 @@ export async function createWeightEntry(
   date: Date,
   note = "",
 ): Promise<WeightEntry> {
-  const db = getFirestoreDb();
+  const userId = requireUserId();
   const now = new Date();
   const data = {
     weight,
@@ -72,7 +77,7 @@ export async function createWeightEntry(
     createdAt: Timestamp.fromDate(now),
     note,
   };
-  const docRef = await addDoc(collection(db, COLLECTION_NAME), data);
+  const docRef = await addDoc(weightEntriesCollection(userId), data);
   return {
     id: docRef.id,
     weight,
@@ -88,8 +93,14 @@ export async function updateWeightEntry(
   date: Date,
   note = "",
 ): Promise<void> {
-  const db = getFirestoreDb();
-  const docRef = doc(db, COLLECTION_NAME, id);
+  const userId = requireUserId();
+  const docRef = doc(
+    getFirestoreDb(),
+    "users",
+    userId,
+    COLLECTION_NAME,
+    id,
+  );
   await updateDoc(docRef, {
     weight,
     date: Timestamp.fromDate(date),
@@ -98,7 +109,13 @@ export async function updateWeightEntry(
 }
 
 export async function deleteWeightEntry(id: string): Promise<void> {
-  const db = getFirestoreDb();
-  const docRef = doc(db, COLLECTION_NAME, id);
+  const userId = requireUserId();
+  const docRef = doc(
+    getFirestoreDb(),
+    "users",
+    userId,
+    COLLECTION_NAME,
+    id,
+  );
   await deleteDoc(docRef);
 }

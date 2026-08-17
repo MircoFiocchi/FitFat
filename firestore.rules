@@ -1,11 +1,28 @@
 rules_version = '2';
 
-// MVP sin autenticación — ajustar cuando se agregue auth.
-// Para uso personal: restringir en producción o habilitar Firebase Auth.
 service cloud.firestore {
   match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /weightEntries/{entryId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /dailyRecommendations/{dateKey} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Colecciones viejas: solo lectura para migrar al usuario logueado.
     match /weightEntries/{entryId} {
-      allow read, write: if true;
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /dailyRecommendations/{dateKey} {
+      allow read: if request.auth != null;
+      allow write: if false;
     }
   }
 }

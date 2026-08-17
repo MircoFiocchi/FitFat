@@ -1,4 +1,11 @@
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
+import {
+  browserLocalPersistence,
+  browserPopupRedirectResolver,
+  getAuth,
+  initializeAuth,
+  type Auth,
+} from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -40,10 +47,32 @@ function getFirebaseApp(): FirebaseApp {
 }
 
 let firestoreInstance: Firestore | null = null;
+let authInstance: Auth | null = null;
 
 export function getFirestoreDb(): Firestore {
   if (!firestoreInstance) {
     firestoreInstance = getFirestore(getFirebaseApp());
   }
   return firestoreInstance;
+}
+
+export function getFirebaseAuth(): Auth {
+  const app = getFirebaseApp();
+
+  if (typeof window === "undefined") {
+    return getAuth(app);
+  }
+
+  if (!authInstance) {
+    try {
+      authInstance = initializeAuth(app, {
+        persistence: browserLocalPersistence,
+        popupRedirectResolver: browserPopupRedirectResolver,
+      });
+    } catch {
+      authInstance = getAuth(app);
+    }
+  }
+
+  return authInstance;
 }
