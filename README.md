@@ -10,6 +10,7 @@ Aplicación personal de seguimiento de peso construida con Next.js, TypeScript, 
 - Vista semanal agrupada (lunes a domingo)
 - Listado responsive (tabla en desktop, cards en mobile)
 - Persistencia en Firestore
+- Recomendaciones con Gemini según peso y motivos diarios
 
 ## Requisitos
 
@@ -56,6 +57,7 @@ firebase deploy --only firestore:rules
 | `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | 425739103847 |
 | `NEXT_PUBLIC_FIREBASE_APP_ID` | tu app id |
 | `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` | tu measurement id |
+| `GEMINI_API_KEY` | key de Google AI Studio (**sin** `NEXT_PUBLIC_`) |
 
 3. **Redeploy** después de agregar las variables (Deployments → Redeploy). Las `NEXT_PUBLIC_*` se embeben en el build; sin redeploy no funcionan.
 
