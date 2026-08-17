@@ -1,31 +1,19 @@
-import {
-  doc,
-  getDoc,
-  setDoc,
-  Timestamp,
-} from "firebase/firestore";
-import { getFirestoreDb } from "./config";
+import { getDoc, setDoc, Timestamp } from "firebase/firestore";
 import { requireUserId } from "./auth.service";
+import { userDoc } from "./paths";
+import { timestampToDate } from "./timestamps";
 import type { DailyRecommendation } from "@/types/recommendation";
 
 const COLLECTION_NAME = "dailyRecommendations";
-
-function dailyRecommendationDoc(userId: string, dateKey: string) {
-  return doc(getFirestoreDb(), "users", userId, COLLECTION_NAME, dateKey);
-}
 
 export async function getDailyRecommendation(
   dateKey: string,
 ): Promise<DailyRecommendation | null> {
   const userId = requireUserId();
-  const snapshot = await getDoc(dailyRecommendationDoc(userId, dateKey));
+  const snapshot = await getDoc(userDoc(userId, COLLECTION_NAME, dateKey));
   if (!snapshot.exists()) return null;
 
   const data = snapshot.data();
-  const createdAt =
-    data.createdAt instanceof Timestamp
-      ? data.createdAt.toDate()
-      : new Date();
   const recommendations = Array.isArray(data.recommendations)
     ? data.recommendations.filter((item): item is string => typeof item === "string")
     : [];
@@ -33,7 +21,7 @@ export async function getDailyRecommendation(
   return {
     dateKey,
     recommendations,
-    createdAt,
+    createdAt: data.createdAt ? timestampToDate(data.createdAt) : new Date(),
   };
 }
 
@@ -43,15 +31,11 @@ export async function saveDailyRecommendation(
 ): Promise<DailyRecommendation> {
   const userId = requireUserId();
   const createdAt = new Date();
-  await setDoc(dailyRecommendationDoc(userId, dateKey), {
+  await setDoc(userDoc(userId, COLLECTION_NAME, dateKey), {
     dateKey,
     recommendations,
     createdAt: Timestamp.fromDate(createdAt),
   });
 
-  return {
-    dateKey,
-    recommendations,
-    createdAt,
-  };
+  return { dateKey, recommendations, createdAt };
 }

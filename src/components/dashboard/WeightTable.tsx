@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/Card";
-import { formatDate } from "@/lib/format";
-import { formatWeight } from "@/lib/format";
+import { formatDate, formatWeight } from "@/lib/format";
 import { formatWeightChange } from "@/utils/weight/calculations";
 import type { WeightEntryWithChange } from "@/types/weight";
 
