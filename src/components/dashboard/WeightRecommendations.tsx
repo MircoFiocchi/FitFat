@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { toDateInputValue } from "@/utils/date/weight-week";
+import { useDailyRecommendation } from "@/hooks/useDailyRecommendation";
+import { getDailyRecommendation } from "@/services/firebase/recommendation.service";
 import type { WeightEntryWithChange } from "@/types/weight";
 
 type WeightRecommendationsProps = {
@@ -12,15 +14,32 @@ type WeightRecommendationsProps = {
 };
 
 export function WeightRecommendations({ entries }: WeightRecommendationsProps) {
-  const [recommendations, setRecommendations] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const {
+    recommendation,
+    loading: loadingToday,
+    alreadyUsedToday,
+    error: loadError,
+    saveToday,
+  } = useDailyRecommendation();
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const tips = recommendation?.recommendations ?? [];
+
   const handleGenerate = async () => {
-    setLoading(true);
+    if (alreadyUsedToday) return;
+
+    setGenerating(true);
     setError(null);
 
     try {
+      const todayKey = toDateInputValue(new Date());
+      const existing = await getDailyRecommendation(todayKey);
+      if (existing) {
+        await saveToday(existing.recommendations);
+        return;
+      }
+
       const response = await fetch("/api/recommendations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -55,10 +74,10 @@ export function WeightRecommendations({ entries }: WeightRecommendationsProps) {
         throw new Error("Respuesta inválida del servidor");
       }
 
-      const tips = data.recommendations.filter(
+      const nextTips = data.recommendations.filter(
         (item): item is string => typeof item === "string",
       );
-      setRecommendations(tips);
+      await saveToday(nextTips);
     } catch (err) {
       setError(
         err instanceof Error
@@ -66,7 +85,7 @@ export function WeightRecommendations({ entries }: WeightRecommendationsProps) {
           : "No se pudieron generar las recomendaciones",
       );
     } finally {
-      setLoading(false);
+      setGenerating(false);
     }
   };
 
@@ -77,29 +96,43 @@ export function WeightRecommendations({ entries }: WeightRecommendationsProps) {
       </h2>
       <Card>
         <p className="mb-4 text-sm text-muted">
-          Gemini arma tips según tu peso y los motivos que anotás. No es consejo
-          médico.
+          Gemini arma tips según tu peso y los motivos que anotás. Podés pedir
+          una recomendación por día. No es consejo médico.
         </p>
 
-        <Button
-          type="button"
-          loading={loading}
-          loadingLabel="Pensando…"
-          onClick={handleGenerate}
-          className="w-full sm:w-auto"
-        >
-          Pedir recomendaciones
-        </Button>
+        {loadingToday && (
+          <p className="mb-4 text-sm text-muted">
+            Consultando la recomendación de hoy…
+          </p>
+        )}
 
-        {error && (
+        {!loadingToday && !alreadyUsedToday && (
+          <Button
+            type="button"
+            loading={generating}
+            loadingLabel="Pensando…"
+            onClick={handleGenerate}
+            className="w-full sm:w-auto"
+          >
+            Pedir recomendaciones
+          </Button>
+        )}
+
+        {!loadingToday && alreadyUsedToday && (
+          <Alert variant="info">
+            Ya pediste la recomendación de hoy. Mañana podés pedir otra.
+          </Alert>
+        )}
+
+        {(error || loadError) && (
           <div className="mt-4">
-            <Alert variant="error">{error}</Alert>
+            <Alert variant="error">{error ?? loadError}</Alert>
           </div>
         )}
 
-        {recommendations.length > 0 && (
+        {tips.length > 0 && (
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-foreground">
-            {recommendations.map((tip) => (
+            {tips.map((tip) => (
               <li key={tip}>{tip}</li>
             ))}
           </ul>

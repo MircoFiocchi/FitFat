@@ -11,6 +11,7 @@ Aplicación personal de seguimiento de peso construida con Next.js, TypeScript, 
 - Listado responsive (tabla en desktop, cards en mobile)
 - Persistencia en Firestore
 - Recomendaciones con Gemini según peso y motivos diarios
+- Inicio de sesión con Google
 
 ## Requisitos
 
@@ -62,9 +63,10 @@ firebase deploy --only firestore:rules
 3. **Redeploy** después de agregar las variables (Deployments → Redeploy). Las `NEXT_PUBLIC_*` se embeben en el build; sin redeploy no funcionan.
 
 4. En [Firebase Console](https://console.firebase.google.com) → proyecto `toxic-out`:
+   - **Authentication** → **Sign-in method** → habilitar **Google**
+   - **Authentication** → **Settings** → **Authorized domains** → agregar `localhost` (si falta) y tu dominio Vercel
    - **Firestore Database** → Create database (si no existe)
-   - **Firestore** → **Rules** → publicar reglas que permitan lectura/escritura en `weightEntries` (ver `firestore.rules`)
-   - **Authentication** → **Settings** → **Authorized domains** → agregar tu dominio Vercel (ej. `fitfat.vercel.app`)
+   - **Firestore** → **Rules** → publicar `firestore.rules` (cada usuario solo ve sus datos en `users/{uid}/...`)
 
 5. Si al cargar datos aparece error de índice en consola, crear el índice desde el enlace que muestra Firebase.
 
@@ -93,4 +95,4 @@ src/
 
 ## Seguridad
 
-Las credenciales de Firebase en el cliente son públicas por diseño. La protección real depende de **Firestore Security Rules**. El MVP actual permite lectura/escritura abierta; incorporar autenticación antes de uso público.
+Las credenciales de Firebase en el cliente son públicas por diseño. La protección real depende de **Firestore Security Rules** y de **Authentication**. Cada usuario solo puede leer y escribir sus documentos bajo `users/{uid}/`.

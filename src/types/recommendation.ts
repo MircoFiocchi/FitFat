@@ -8,3 +8,9 @@ export type RecommendationEntryInput = {
 export type RecommendationsResponse = {
   recommendations: string[];
 };
+
+export type DailyRecommendation = {
+  dateKey: string;
+  recommendations: string[];
+  createdAt: Date;
+};
