@@ -7,6 +7,7 @@ import { WeeklySummaryTable } from "@/components/dashboard/WeeklySummaryTable";
 import { WeightForm } from "@/components/dashboard/WeightForm";
 import { WeightTable } from "@/components/dashboard/WeightTable";
 import { WeightList } from "@/components/dashboard/WeightList";
+import { WeightRecommendations } from "@/components/dashboard/WeightRecommendations";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Alert } from "@/components/ui/Alert";
 import { useWeightEntries } from "@/hooks/useWeightEntries";
@@ -45,6 +46,7 @@ export function Dashboard() {
       {hasEntries && (
         <>
           <WeightSummaryCards summary={summary} />
+          <WeightRecommendations entries={entriesWithChange} />
           <WeightChart entries={entries} />
           <WeeklySummaryTable weeks={weeklySummaries} />
           <section aria-label="Registros de peso">
